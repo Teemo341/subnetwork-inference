@@ -6,6 +6,8 @@
 import copy
 import torch
 from tqdm import tqdm
+
+from src.utils import list_batchnorm_layers
 from src.baselines.utils import flatten, unflatten_like
 
 
@@ -101,7 +103,8 @@ class SWAG(torch.nn.Module):
 
                 params.append((module, name_full))
 
-    def get_mean_vector(self, batchnorm_layers, mask=None):
+    def get_mean_vector(self, mask=None):
+        batchnorm_layers = list_batchnorm_layers(model)
         mean_list = []
         for module, name in self.params:
             name_full = name.replace("-", ".")
@@ -113,10 +116,11 @@ class SWAG(torch.nn.Module):
                 mean_list.append(mean.cpu())
         return flatten(mean_list)
 
-    def get_variance_vector(self, batchnorm_layers, mask=None):
+    def get_variance_vector(self, mask=None):
         mean_list = []
         sq_mean_list = []
 
+        batchnorm_layers = list_batchnorm_layers(model)
         for module, name in self.params:
             name_full = name.replace("-", ".")
             name_full = name_full.replace('module.', '')
@@ -138,10 +142,11 @@ class SWAG(torch.nn.Module):
 
         return variances
 
-    def get_covariance_matrix(self, batchnorm_layers, eps=1e-10):
+    def get_covariance_matrix(self, eps=1e-10):
         if self.no_cov_mat:
             raise RuntimeError("No covariance matrix was estimated!")
 
+        batchnorm_layers = list_batchnorm_layers(model)
         cov_mat_sqrt_list = []
         for module, name in self.params:
             name_full = name.replace("-", ".")

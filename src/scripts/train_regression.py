@@ -1,11 +1,9 @@
 import time
-import copy
-from pathlib import Path
 import torch.backends.cudnn as cudnn
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from src.utils import load_object, save_object, mkdir, check_dataparallel_save, strip_dataparallel_save, model_to_device
+from src.utils import load_object, save_object, mkdir, check_dataparallel_save, strip_dataparallel_save
 import numpy as np
 import shutil
 import os

@@ -1,15 +1,15 @@
-import torch
-import torch.nn as nn
 import os
+import csv
 import pickle
-from torch.nn import DataParallel
-import torch.utils.data as data
-from torch.distributions import Normal
-import torch.nn.functional as F
-from collections import OrderedDict
 import numpy as np
 from PIL import Image
-import csv
+from collections import OrderedDict
+
+import torch
+import torch.nn as nn
+import torch.utils.data as data
+import torch.nn.functional as F
+from torch.distributions import Normal
 from torchvision import datasets
 
 from src.models.img_resnets import resnet18, resnet34, resnet50, resnet101
@@ -32,7 +32,8 @@ def get_last_layer(model):
     return layer
     
 
-def flatten_nn(model, batchnorm_layers):
+def flatten_nn(model):
+    batchnorm_layers = list_batchnorm_layers(model)
     weights = []
     for name, param in model.named_parameters():
         name = name.replace('module.', '')
@@ -41,8 +42,8 @@ def flatten_nn(model, batchnorm_layers):
     return torch.cat(weights, dim=0)
 
 
-def unflatten_nn(model, batchnorm_layers, weights):
-
+def unflatten_nn(model, weights):
+    batchnorm_layers = list_batchnorm_layers(model)
     w_pointer = 0
     weight_dict = {}
     for name, param in model.named_parameters():
@@ -56,7 +57,8 @@ def unflatten_nn(model, batchnorm_layers, weights):
     return weight_dict
 
 
-def get_n_params(model, batchnorm_layers, mask=None):
+def get_n_params(model, mask=None):
+    batchnorm_layers = list_batchnorm_layers(model)
     D = 0
     for name, param in model.named_parameters():
         name = name.replace('module.', '')
